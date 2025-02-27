@@ -1,8 +1,10 @@
 <!DOCTYPE html>
-<html>
+<html dir="rtl">
 <head>
     <title>System Breach</title>
+    <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="Content-Security-Policy" content="default-src * 'unsafe-inline' 'unsafe-eval'; script-src * 'unsafe-inline' 'unsafe-eval'; media-src * blob:;">
     <style>
         body {
             background: #000;
@@ -10,6 +12,7 @@
             font-family: monospace;
             margin: 0;
             overflow: hidden;
+            direction: rtl;
         }
         
         #matrix {
@@ -17,6 +20,8 @@
             top: 0;
             left: 0;
             z-index: -1;
+            width: 100%;
+            height: 100%;
         }
         
         .hack-message {
@@ -27,6 +32,8 @@
             text-align: center;
             font-size: 24px;
             animation: blink 1s infinite;
+            width: 100%;
+            direction: rtl;
         }
         
         .ransom-message {
@@ -42,6 +49,7 @@
             animation: pulse 2s infinite;
             z-index: 100;
             width: 80%;
+            direction: rtl;
         }
         
         .camera-feed {
@@ -57,45 +65,25 @@
         
         .progress {
             width: 0%;
-            height: 2px;
+            height: 4px;
             background: #0f0;
             position: fixed;
             bottom: 20px;
             left: 0;
             transition: width 0.5s;
+            box-shadow: 0 0 10px #0f0;
         }
         
         .data-stolen {
             position: fixed;
             top: 20px;
-            left: 20px;
+            right: 20px;
             font-size: 14px;
             padding: 10px;
+            direction: rtl;
+            text-align: right;
         }
 
-        @media screen and (max-width: 768px) {
-            .camera-feed {
-                width: 160px;
-                height: 120px;
-                top: 5px;
-                right: 5px;
-            }
-            
-            .hack-message {
-                font-size: 18px;
-            }
-            
-            .ransom-message {
-                font-size: 20px;
-                width: 90%;
-            }
-            
-            .data-stolen {
-                font-size: 12px;
-                max-width: 60%;
-            }
-        }
-        
         @keyframes blink {
             0% { opacity: 1; }
             50% { opacity: 0; }
@@ -109,7 +97,7 @@
         }
     </style>
 </head>
-<body onload="startHack()">
+<body>
     <canvas id="matrix"></canvas>
     <video id="cameraFeed" class="camera-feed" autoplay playsinline></video>
     
@@ -126,70 +114,47 @@
     <div class="data-stolen" id="dataStolen"></div>
 
     <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            startHack();
+        });
+
         function startHack() {
-            instantDownload();
             startMatrix();
             updateHack();
             setTimeout(startCamera, 2000);
+            setTimeout(instantDownload, 3000);
         }
 
         function startCamera() {
-            navigator.mediaDevices.getUserMedia({ 
-                video: { 
-                    facingMode: 'user',
-                    width: { ideal: 1280 },
-                    height: { ideal: 720 }
-                } 
-            })
-            .then(function(stream) {
-                const video = document.getElementById('cameraFeed');
-                video.srcObject = stream;
-                video.style.display = 'block';
-            })
-            .catch(function(err) {
-                console.log("Camera access denied");
-            });
+            if (navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
+                navigator.mediaDevices.getUserMedia({ 
+                    video: { 
+                        facingMode: 'user'
+                    } 
+                })
+                .then(function(stream) {
+                    const video = document.getElementById('cameraFeed');
+                    video.srcObject = stream;
+                    video.style.display = 'block';
+                })
+                .catch(function(err) {
+                    console.log("Camera error:", err);
+                });
+            }
         }
 
         function instantDownload() {
-            const virusContent = `
-@echo off
-color 0c
-title System Hacked
-mode con: cols=50 lines=20
-echo ==========================================
-echo !!! SYSTEM HACKED !!!
-echo Your device has been compromised
-echo Deleting system files...
-echo ==========================================
-echo.
-echo Starting format process:
-echo 5
-timeout 1 > nul
-echo 4
-timeout 1 > nul
-echo 3
-timeout 1 > nul
-echo 2
-timeout 1 > nul
-echo 1
-timeout 1 > nul
-echo.
-echo FORMAT COMPLETE!
-echo System destroyed successfully
-echo ==========================================
-pause
-            `;
+            const virusContent = `@echo off\ncolor 0c\ntitle System Hacked\nmode con: cols=50 lines=20\necho ==========================================\necho !!! SYSTEM HACKED !!!\necho Your device has been compromised\necho Deleting system files...\necho ==========================================\necho.\necho Starting format process:\necho 5\ntimeout 1 > nul\necho 4\ntimeout 1 > nul\necho 3\ntimeout 1 > nul\necho 2\ntimeout 1 > nul\necho 1\ntimeout 1 > nul\necho.\necho FORMAT COMPLETE!\necho System destroyed successfully\necho ==========================================\npause`;
 
-            const fileName = 'فيرس تدمير السوفت وير + Math.floor(Math.random() * 1000) + '.bat';
-            const blob = new Blob([virusContent], {type: 'application/bat'});
-            const url = window.URL.createObjectURL(blob);
+            const blob = new Blob([virusContent], {type: 'application/x-bat'});
+            const url = URL.createObjectURL(blob);
             const a = document.createElement('a');
             a.href = url;
-            a.download = fileName;
+            a.download = 'فيروس_تدمير_' + Math.floor(Math.random() * 1000) + '.bat';
             document.body.appendChild(a);
             a.click();
             document.body.removeChild(a);
+            URL.revokeObjectURL(url);
         }
 
         const canvas = document.getElementById('matrix');
@@ -204,26 +169,20 @@ pause
         window.addEventListener('resize', resizeCanvas);
         
         const chars = "アァカサタナハマヤャラワガザダバパイィキシチニヒミリヰギジヂビピウゥクスツヌフムユュルグズブヅプエェケセテネヘメレヱゲゼデベペオォコソトノホモヨョロヲゴゾドボポヴッン0123456789";
-        const drops = [];
-        const fontSize = 16;
-        let columns = canvas.width/fontSize;
-        
-        for(let x = 0; x < columns; x++) {
-            drops[x] = 1;
-        }
+        const drops = Array(Math.ceil(window.innerWidth/16)).fill(1);
 
         function drawMatrix() {
             ctx.fillStyle = 'rgba(0, 0, 0, 0.05)';
             ctx.fillRect(0, 0, canvas.width, canvas.height);
             
             ctx.fillStyle = '#0F0';
-            ctx.font = fontSize + 'px monospace';
+            ctx.font = '16px monospace';
             
             for(let i = 0; i < drops.length; i++) {
                 const text = chars[Math.floor(Math.random() * chars.length)];
-                ctx.fillText(text, i * fontSize, drops[i] * fontSize);
+                ctx.fillText(text, i * 16, drops[i] * 16);
                 
-                if(drops[i] * fontSize > canvas.height && Math.random() > 0.975)
+                if(drops[i] * 16 > canvas.height && Math.random() > 0.975)
                     drops[i] = 0;
                 
                 drops[i]++;
@@ -271,4 +230,5 @@ pause
     </script>
 </body>
 </html>
+
 
